@@ -1,6 +1,6 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { OAUTH_STORAGE_KEYS } from '../../constants';
+import { authActions } from '../../store/auth';
 
 export const Route = createFileRoute('/auth/callback')({
   component: CallbackComponent,
@@ -26,14 +26,21 @@ function CallbackComponent() {
     }
 
     if (access_token && user_id) {
-      // Store tokens and user data
-      localStorage.setItem(OAUTH_STORAGE_KEYS.ACCESS_TOKEN, access_token);
-      if (refresh_token) {
-        localStorage.setItem(OAUTH_STORAGE_KEYS.REFRESH_TOKEN, refresh_token);
-      }
-      if (user_id) localStorage.setItem(OAUTH_STORAGE_KEYS.USER_ID, user_id);
-      if (email) localStorage.setItem(OAUTH_STORAGE_KEYS.USER_EMAIL, email);
-      if (name) localStorage.setItem(OAUTH_STORAGE_KEYS.USER_NAME, name);
+      // COMPLETELY CLEAR localStorage to ensure no old values exist
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Create user object from URL params
+      const userData = {
+        id: user_id,
+        email: email || '',
+        name: name || '',
+        avatar_url: undefined, // Not provided by backend currently
+      };
+
+      // Use auth store to properly set authentication state
+      // This will store ONLY the standardized keys: @user, @access_token, and @refresh_token
+      authActions.login(userData, access_token, refresh_token, true);
 
       // Redirect to home or intended page
       window.location.href = '/';

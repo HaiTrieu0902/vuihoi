@@ -75,10 +75,24 @@ async def msal_login():
         f"client_id={client_id}&"
         f"response_type=code&"
         f"redirect_uri={urllib.parse.quote(MSAL_REDIRECT_URI)}&"
-        f"scope={urllib.parse.quote(scopes)}"
+        f"scope={urllib.parse.quote(scopes)}&"
+        f"prompt=select_account"
     )
     
     return RedirectResponse(auth_url)
+
+
+@oauth_router.get("/msal/logout")
+async def msal_logout():
+    """Redirect to Microsoft OAuth logout."""
+    tenant_id = settings.effective_azure_tenant_id or "common"
+    
+    logout_url = (
+        f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/logout?"
+        f"post_logout_redirect_uri={urllib.parse.quote(FRONTEND_REDIRECT_URI)}"
+    )
+    
+    return RedirectResponse(logout_url)
 
 
 @oauth_router.get("/msal")

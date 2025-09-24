@@ -12,6 +12,7 @@ export interface User {
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
+  refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
@@ -23,6 +24,7 @@ const getInitialState = (): AuthState => {
     return {
       user: null,
       accessToken: null,
+      refreshToken: null,
       isLoading: false,
       isAuthenticated: false,
     };
@@ -32,13 +34,18 @@ const getInitialState = (): AuthState => {
     const storedUser = localStorage.getItem(KEY_LOCALSTORAGE_SYNC.user);
     const storedToken =
       localStorage.getItem(KEY_LOCALSTORAGE_SYNC.token) || sessionStorage.getItem(KEY_LOCALSTORAGE_SYNC.token);
+    const storedRefreshToken =
+      localStorage.getItem(KEY_LOCALSTORAGE_SYNC.refreshToken) ||
+      sessionStorage.getItem(KEY_LOCALSTORAGE_SYNC.refreshToken);
 
     const user = storedUser ? JSON.parse(storedUser) : null;
     const accessToken = storedToken || null;
+    const refreshToken = storedRefreshToken || null;
 
     return {
       user,
       accessToken,
+      refreshToken,
       isLoading: false,
       isAuthenticated: !!(user && accessToken),
     };
@@ -47,11 +54,14 @@ const getInitialState = (): AuthState => {
     // Clear corrupted data
     localStorage.removeItem(KEY_LOCALSTORAGE_SYNC.user);
     localStorage.removeItem(KEY_LOCALSTORAGE_SYNC.token);
+    localStorage.removeItem(KEY_LOCALSTORAGE_SYNC.refreshToken);
     sessionStorage.removeItem(KEY_LOCALSTORAGE_SYNC.token);
+    sessionStorage.removeItem(KEY_LOCALSTORAGE_SYNC.refreshToken);
 
     return {
       user: null,
       accessToken: null,
+      refreshToken: null,
       isLoading: false,
       isAuthenticated: false,
     };
@@ -72,10 +82,11 @@ export const authActions = {
   },
 
   // Login function
-  login: (userData: User, token: string, rememberMe: boolean = true) => {
+  login: (userData: User, token: string, refreshToken?: string, rememberMe: boolean = true) => {
     const newState: AuthState = {
       user: userData,
       accessToken: token,
+      refreshToken: refreshToken || null,
       isLoading: false,
       isAuthenticated: true,
     };
@@ -84,11 +95,15 @@ export const authActions = {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem(KEY_LOCALSTORAGE_SYNC.user, JSON.stringify(userData));
     storage.setItem(KEY_LOCALSTORAGE_SYNC.token, token);
+    if (refreshToken) {
+      storage.setItem(KEY_LOCALSTORAGE_SYNC.refreshToken, refreshToken);
+    }
 
     // Clear the other storage
     const otherStorage = rememberMe ? sessionStorage : localStorage;
     otherStorage.removeItem(KEY_LOCALSTORAGE_SYNC.user);
     otherStorage.removeItem(KEY_LOCALSTORAGE_SYNC.token);
+    otherStorage.removeItem(KEY_LOCALSTORAGE_SYNC.refreshToken);
 
     authStore.setState(() => newState);
   },
@@ -98,15 +113,14 @@ export const authActions = {
     const newState: AuthState = {
       user: null,
       accessToken: null,
+      refreshToken: null,
       isLoading: false,
       isAuthenticated: false,
     };
 
-    // Clear both storages
-    localStorage.removeItem(KEY_LOCALSTORAGE_SYNC.user);
-    localStorage.removeItem(KEY_LOCALSTORAGE_SYNC.token);
-    sessionStorage.removeItem(KEY_LOCALSTORAGE_SYNC.user);
-    sessionStorage.removeItem(KEY_LOCALSTORAGE_SYNC.token);
+    // COMPLETELY CLEAR ALL localStorage and sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
 
     authStore.setState(() => newState);
   },
@@ -140,6 +154,20 @@ export const authActions = {
         ...state,
         accessToken: token,
         isAuthenticated: !!(state.user && token),
+      };
+    });
+  },
+
+  // Update refresh token
+  updateRefreshToken: (refreshToken: string) => {
+    authStore.setState((state) => {
+      // Update storage
+      const storage = localStorage.getItem(KEY_LOCALSTORAGE_SYNC.token) ? localStorage : sessionStorage;
+      storage.setItem(KEY_LOCALSTORAGE_SYNC.refreshToken, refreshToken);
+
+      return {
+        ...state,
+        refreshToken,
       };
     });
   },
