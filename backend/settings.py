@@ -63,6 +63,38 @@ class Settings(BaseSettings):
     guest_token_expire_hours: int = 24
     refresh_token_expire_days: int = 30
 
+    # Azure AD / MSAL
+    azure_client_id: Optional[str] = None
+    azure_client_secret: Optional[str] = None
+    azure_tenant_id: Optional[str] = None
+    
+    # Alternative names for Azure settings (with APP_ prefix)
+    app_azure_client_id: Optional[str] = None
+    app_azure_tenant_id: Optional[str] = None
+    app_azure_redirect_uri: Optional[str] = None
+    
+    # OAuth redirect URIs
+    msal_redirect_uri: Optional[str] = None
+    frontend_redirect_uri: Optional[str] = None
+    app_msal_redirect_uri: Optional[str] = None
+    app_frontend_redirect_uri: Optional[str] = None
+    
+    @property
+    def effective_azure_client_id(self) -> Optional[str]:
+        return self.azure_client_id or self.app_azure_client_id
+    
+    @property 
+    def effective_azure_tenant_id(self) -> Optional[str]:
+        return self.azure_tenant_id or self.app_azure_tenant_id
+    
+    @property
+    def effective_msal_redirect_uri(self) -> str:
+        return self.msal_redirect_uri or self.app_msal_redirect_uri or "http://localhost:8000/auth/msal"
+    
+    @property
+    def effective_frontend_redirect_uri(self) -> str:
+        return self.frontend_redirect_uri or self.app_frontend_redirect_uri or "http://localhost:7101/auth/callback"
+
     # Environment
     env: Literal["prod", "dev"] = "prod"
 

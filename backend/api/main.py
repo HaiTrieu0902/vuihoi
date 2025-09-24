@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sqlalchemy import text
 
-from api.routers.auth import router as auth_router
+from api.routers.auth import router as auth_router, oauth_router
 
 from core.middleware import (
     APIRateLimitMiddleware,
@@ -102,6 +102,7 @@ app.add_middleware(
 # Public routes
 # app.include_router(health_router)
 app.include_router(auth_router)
+app.include_router(oauth_router)
 
 # Protected routes
 # app.include_router(chat_router)

@@ -18,6 +18,16 @@ export interface AuthState {
 
 // Initialize auth state from localStorage
 const getInitialState = (): AuthState => {
+  // Check if we're in the browser
+  if (typeof window === 'undefined') {
+    return {
+      user: null,
+      accessToken: null,
+      isLoading: false,
+      isAuthenticated: false,
+    };
+  }
+
   try {
     const storedUser = localStorage.getItem(KEY_LOCALSTORAGE_SYNC.user);
     const storedToken =

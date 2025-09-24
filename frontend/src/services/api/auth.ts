@@ -23,21 +23,14 @@ export interface LoginResponse {
 
 // OAuth Service
 export class OAuthService {
-  // Login with MSAL
-  static async loginWithMSAL(userData: OAuthUser): Promise<LoginResponse> {
+  // Login with MSAL - redirects to backend OAuth endpoint
+  static loginWithMSAL(): void {
     try {
-      const response = await client.post('/api/auth/login-msal', {
-        provider_user_id: userData.id,
-        email: userData.email,
-        name: userData.name,
-        avatar_url: userData.avatar_url,
-        access_token: userData.access_token,
-        refresh_token: userData.refresh_token,
-      });
-      return response.data;
+      const oauthUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/msal/login`;
+      window.location.href = oauthUrl;
     } catch (error) {
-      console.error('MSAL login error:', error);
-      throw new Error('Failed to login with Microsoft');
+      console.error('MSAL login redirect error:', error);
+      throw new Error('Failed to start Microsoft login');
     }
   }
 

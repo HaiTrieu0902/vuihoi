@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { MSALService, GoogleOAuthService, GitHubOAuthService } from '../../services/oauth';
+/* eslint-disable sort-imports */
+import { useState } from 'react';
+import { GitHubOAuthService, GoogleOAuthService, MSALService } from '../../services/oauth';
 
 const LoginForm = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleMSALLogin = async () => {
+  const handleMSALLogin = () => {
     try {
       setLoading('msal');
       setError(null);
-      await MSALService.login();
-    } catch (error) {
-      setError('Failed to login with Microsoft. Please try again.');
-      console.error('MSAL login error:', error);
-    } finally {
+      MSALService.login();
+    } catch (err) {
+      setError('Failed to start Microsoft login. Please try again.');
+      console.error('MSAL redirect error:', err);
       setLoading(null);
     }
   };
@@ -23,9 +23,9 @@ const LoginForm = () => {
       setLoading('google');
       setError(null);
       await GoogleOAuthService.login();
-    } catch (error) {
+    } catch (err) {
       setError('Failed to login with Google. Please try again.');
-      console.error('Google login error:', error);
+      console.error('Google login error:', err);
     } finally {
       setLoading(null);
     }
@@ -36,9 +36,9 @@ const LoginForm = () => {
       setLoading('github');
       setError(null);
       await GitHubOAuthService.login();
-    } catch (error) {
+    } catch (err) {
       setError('Failed to login with GitHub. Please try again.');
-      console.error('GitHub login error:', error);
+      console.error('GitHub login error:', err);
     } finally {
       setLoading(null);
     }
