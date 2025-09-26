@@ -78,6 +78,18 @@ class Settings(BaseSettings):
     frontend_redirect_uri: Optional[str] = None
     app_msal_redirect_uri: Optional[str] = None
     app_frontend_redirect_uri: Optional[str] = None
+
+    # Google OAuth
+    google_client_id: Optional[str] = None
+    google_client_secret: Optional[str] = None
+    google_redirect_uri: Optional[str] = None
+    google_frontend_redirect_uri: Optional[str] = None
+
+    # GitHub OAuth
+    github_client_id: Optional[str] = None
+    github_client_secret: Optional[str] = None
+    github_redirect_uri: Optional[str] = None
+    github_frontend_redirect_uri: Optional[str] = None
     
     @property
     def effective_azure_client_id(self) -> Optional[str]:
@@ -94,6 +106,38 @@ class Settings(BaseSettings):
     @property
     def effective_frontend_redirect_uri(self) -> str:
         return self.frontend_redirect_uri or self.app_frontend_redirect_uri or "http://localhost:7101/auth/callback"
+
+    @property
+    def effective_google_client_id(self) -> Optional[str]:
+        return self.google_client_id
+    
+    @property
+    def effective_google_client_secret(self) -> Optional[str]:
+        return self.google_client_secret
+    
+    @property
+    def effective_google_redirect_uri(self) -> str:
+        return self.google_redirect_uri or "http://localhost:8000/auth/callback/google"
+    
+    @property
+    def effective_google_frontend_redirect_uri(self) -> str:
+        return self.google_frontend_redirect_uri or "http://localhost:7101/auth/callback/google"
+
+    @property
+    def effective_github_client_id(self) -> Optional[str]:
+        return self.github_client_id
+    
+    @property
+    def effective_github_client_secret(self) -> Optional[str]:
+        return self.github_client_secret
+    
+    @property
+    def effective_github_redirect_uri(self) -> str:
+        return self.github_redirect_uri or "http://localhost:8000/auth/callback/github"
+    
+    @property
+    def effective_github_frontend_redirect_uri(self) -> str:
+        return self.github_frontend_redirect_uri or "http://localhost:7101/auth/callback/github"
 
     # Environment
     env: Literal["prod", "dev"] = "prod"

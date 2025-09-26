@@ -34,43 +34,28 @@ export class OAuthService {
     }
   }
 
-  // Login with Google
-  static async loginWithGoogle(userData: OAuthUser): Promise<LoginResponse> {
+  // Login with Google - redirects to backend OAuth endpoint
+  static loginWithGoogle(): void {
     try {
-      const response = await client.post('/api/auth/login-google', {
-        provider_user_id: userData.id,
-        email: userData.email,
-        name: userData.name,
-        avatar_url: userData.avatar_url,
-        access_token: userData.access_token,
-        refresh_token: userData.refresh_token,
-      });
-      return response.data;
+      const oauthUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google/login`;
+      window.location.href = oauthUrl;
     } catch (error) {
-      console.error('Google login error:', error);
-      throw new Error('Failed to login with Google');
+      console.error('Google OAuth login redirect error:', error);
+      throw new Error('Failed to start Google login');
     }
   }
 
-  // Login with GitHub
-  static async loginWithGitHub(userData: OAuthUser): Promise<LoginResponse> {
+  // Login with GitHub - redirects to backend OAuth endpoint
+  static loginWithGitHub(): void {
     try {
-      const response = await client.post('/api/auth/login-github', {
-        provider_user_id: userData.id,
-        email: userData.email,
-        name: userData.name,
-        avatar_url: userData.avatar_url,
-        access_token: userData.access_token,
-        refresh_token: userData.refresh_token,
-      });
-      return response.data;
+      const oauthUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/github/login`;
+      window.location.href = oauthUrl;
     } catch (error) {
-      console.error('GitHub login error:', error);
-      throw new Error('Failed to login with GitHub');
+      console.error('GitHub OAuth login redirect error:', error);
+      throw new Error('Failed to start GitHub login');
     }
   }
 
-  // Logout
   static async logout(): Promise<void> {
     try {
       await client.post('/api/auth/logout');

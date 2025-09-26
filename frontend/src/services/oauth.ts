@@ -36,19 +36,23 @@ export class MSALService {
 // Google OAuth Service
 export class GoogleOAuthService {
   static login(): void {
-    // For now, redirect to backend (backend Google OAuth endpoint to be implemented)
-    // TODO: Implement backend Google OAuth redirect endpoint
-    console.warn('Google OAuth redirect not yet implemented on backend');
-    window.location.href = '/auth/login?error=google_not_implemented';
+    try {
+      OAuthService.loginWithGoogle();
+    } catch (error) {
+      console.error('Google OAuth login error:', error);
+      throw error;
+    }
   }
 }
 
 // GitHub OAuth Service
 export class GitHubOAuthService {
   static login(): void {
-    // For now, redirect to backend (backend GitHub OAuth endpoint to be implemented)
-    // TODO: Implement backend GitHub OAuth redirect endpoint
-    console.warn('GitHub OAuth redirect not yet implemented on backend');
-    window.location.href = '/auth/login?error=github_not_implemented';
+    try {
+      OAuthService.loginWithGitHub();
+    } catch (error) {
+      console.error('GitHub OAuth login error:', error);
+      throw error;
+    }
   }
 }

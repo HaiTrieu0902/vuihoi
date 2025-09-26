@@ -13,7 +13,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       // Redirect to login page if not authenticated
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
   }, [isAuthenticated, isLoading, router]);
 
