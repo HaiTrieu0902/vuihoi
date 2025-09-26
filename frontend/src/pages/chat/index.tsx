@@ -1,5 +1,5 @@
-import AuthGuard from '../../guard/AuthGuard';
 import DashboardLayout from '../../components/DashboardLayout';
+import AuthGuard from '../../guard/AuthGuard';
 
 const ChatPage = () => {
   return (

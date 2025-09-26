@@ -23,7 +23,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-// Using emojis for icons since @mui/icons-material is not installed
+import { SmartToy, Psychology, History, Translate } from '@mui/icons-material';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -55,25 +55,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     {
       name: 'AI Chat',
       path: '/chat',
-      icon: '🤖',
+      icon: <SmartToy sx={{ fontSize: '1.5rem' }} />,
       description: 'Chat with intelligent AI',
     },
     {
       name: 'Deep Learning',
       path: '/deep_learning',
-      icon: '🧠',
+      icon: <Psychology sx={{ fontSize: '1.5rem' }} />,
       description: 'AI & Machine Learning',
     },
     {
       name: 'History',
       path: '/history',
-      icon: '📚',
+      icon: <History sx={{ fontSize: '1.5rem' }} />,
       description: 'View conversation history',
     },
     {
       name: 'Translate',
       path: '/translate',
-      icon: '🌐',
+      icon: <Translate sx={{ fontSize: '1.5rem' }} />,
       description: 'AI-powered translation',
     },
   ];
@@ -238,7 +238,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       justifyContent: 'center',
                     }}
                   >
-                    <Box sx={{ fontSize: '1.5rem' }}>{item.icon}</Box>
+                    {item.icon}
                   </ListItemIcon>
                   {isSidebarOpen && (
                     <ListItemText

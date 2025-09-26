@@ -1,22 +1,23 @@
-import { Link } from '@tanstack/react-router';
-import AuthGuard from '../guard/AuthGuard';
-import DashboardLayout from '../components/DashboardLayout';
 import {
   Box,
-  Container,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  CardActionArea,
-  Chip,
-  TextField,
   Button,
-  InputAdornment,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  Container,
   Fade,
+  InputAdornment,
+  Paper,
+  TextField,
+  Typography,
   alpha,
   useTheme,
 } from '@mui/material';
+import { SmartToy, Psychology, History, Translate } from '@mui/icons-material';
+import { Link } from '@tanstack/react-router';
+import DashboardLayout from '../components/DashboardLayout';
+import AuthGuard from '../guard/AuthGuard';
 
 const DashboardPage = () => {
   const theme = useTheme();
@@ -25,28 +26,28 @@ const DashboardPage = () => {
     {
       title: 'AI Chat',
       description: 'Chat with intelligent AI',
-      icon: '🤖',
+      icon: <SmartToy sx={{ fontSize: '3rem' }} />,
       path: '/chat',
       gradient: ['#667eea', '#764ba2'],
     },
     {
       title: 'Deep Learning',
       description: 'AI & Machine Learning',
-      icon: '🧠',
+      icon: <Psychology sx={{ fontSize: '3rem' }} />,
       path: '/deep_learning',
       gradient: ['#f093fb', '#f5576c'],
     },
     {
       title: 'History',
       description: 'View conversation history',
-      icon: '📚',
+      icon: <History sx={{ fontSize: '3rem' }} />,
       path: '/history',
       gradient: ['#4facfe', '#00f2fe'],
     },
     {
       title: 'Translate',
       description: 'AI-powered translation',
-      icon: '🌐',
+      icon: <Translate sx={{ fontSize: '3rem' }} />,
       path: '/translate',
       gradient: ['#43e97b', '#38f9d7'],
     },
@@ -115,7 +116,7 @@ const DashboardPage = () => {
                 >
                   <CardActionArea component={Link} to={card.path} sx={{ height: '100%', p: 3 }}>
                     <CardContent sx={{ textAlign: 'center', p: 0 }}>
-                      <Box sx={{ fontSize: '3rem', mb: 2 }}>{card.icon}</Box>
+                      <Box sx={{ mb: 2 }}>{card.icon}</Box>
                       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                         {card.title}
                       </Typography>
