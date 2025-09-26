@@ -1,33 +1,31 @@
-import { useState } from 'react';
-import { Link, useLocation, useRouter } from '@tanstack/react-router';
-import { useAuthStore } from '../store/auth';
-import type { ReactNode } from 'react';
 import {
   AppBar,
-  Toolbar,
+  Avatar,
+  Box,
+  Chip,
+  Divider,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  IconButton,
-  Avatar,
-  Typography,
-  Box,
-  Divider,
   Menu,
   MenuItem,
-  Chip,
   Paper,
+  Toolbar,
+  Typography,
   useTheme,
-  alpha,
 } from '@mui/material';
-import { SmartToy, Psychology, History, Translate } from '@mui/icons-material';
+import { Link, useLocation, useRouter } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import { useAuthStore } from '../store/auth';
 
-interface DashboardLayoutProps {
+type DashboardLayoutProps = {
   children: ReactNode;
-}
+};
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, actions } = useAuthStore();
@@ -40,7 +38,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const handleLogout = () => {
     actions.logout();
     router.navigate({ to: '/auth/login' });
-    setAnchorEl(null);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -55,31 +52,31 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     {
       name: 'AI Chat',
       path: '/chat',
-      icon: <SmartToy sx={{ fontSize: '1.5rem' }} />,
+      icon: '🤖',
       description: 'Chat with intelligent AI',
     },
     {
       name: 'Deep Learning',
       path: '/deep_learning',
-      icon: <Psychology sx={{ fontSize: '1.5rem' }} />,
+      icon: '🧠',
       description: 'AI & Machine Learning',
     },
     {
       name: 'History',
       path: '/history',
-      icon: <History sx={{ fontSize: '1.5rem' }} />,
+      icon: '📚',
       description: 'View conversation history',
     },
     {
       name: 'Translate',
       path: '/translate',
-      icon: <Translate sx={{ fontSize: '1.5rem' }} />,
+      icon: '🌐',
       description: 'AI-powered translation',
     },
   ];
 
   const currentPath = location.pathname;
-  const drawerWidth = isSidebarOpen ? 280 : 72;
+  const drawerWidth = isSidebarOpen ? { xs: 240, sm: 260, md: 280 } : { xs: 60, sm: 68, md: 72 };
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -88,33 +85,49 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         position="fixed"
         sx={{
           zIndex: theme.zIndex.drawer + 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px 0 rgba(0,0,0,0.12)',
+          background: '#fff',
+          color: '#222',
+          boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+          borderBottom: '1px solid #e5e7eb',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, px: { xs: 2, sm: 4 } }}>
           <IconButton
-            color="inherit"
             aria-label="toggle drawer"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             edge="start"
-            sx={{ mr: 2 }}
+            sx={{ mr: { xs: 1, sm: 2 }, color: '#888' }}
           >
             ☰
           </IconButton>
 
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              flexGrow: 1,
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+              color: '#222',
+              fontWeight: 600,
+            }}
+          >
             VuiHoi AI Platform
           </Typography>
 
           <Chip
-            avatar={<Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>👋</Avatar>}
+            avatar={<Avatar sx={{ bgcolor: '#f3f4f6', color: '#222', width: 24, height: 24 }}>👋</Avatar>}
             label={`Hello, ${user?.name || user?.email || 'User'}!`}
             variant="outlined"
             sx={{
-              color: 'white',
-              borderColor: 'rgba(255,255,255,0.3)',
+              color: '#222',
+              borderColor: '#e5e7eb',
               mr: 2,
+              background: '#f9fafb',
+              display: { xs: 'none', sm: 'flex' },
+              '& .MuiChip-label': {
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              },
             }}
           />
 
@@ -124,13 +137,15 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             aria-controls="menu-appbar"
             aria-haspopup="true"
             onClick={handleMenuOpen}
-            color="inherit"
+            sx={{ width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 }, color: '#888' }}
           >
             <Avatar
               sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                width: 36,
-                height: 36,
+                bgcolor: '#f3f4f6',
+                color: '#222',
+                width: { xs: 32, sm: 36 },
+                height: { xs: 32, sm: 36 },
+                fontWeight: 600,
               }}
             >
               {user?.name ? user.name.charAt(0) : user?.email ? user.email.charAt(0) : 'U'}
@@ -140,15 +155,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <Menu
             id="menu-appbar"
             anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
@@ -164,78 +173,98 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Menu>
         </Toolbar>
       </AppBar>
-
       {/* Sidebar Drawer */}
       <Drawer
         variant="persistent"
         anchor="left"
         open={true}
         sx={{
-          width: drawerWidth,
+          width: isSidebarOpen ? drawerWidth.xs : drawerWidth.xs,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
+            width: isSidebarOpen ? drawerWidth.xs : drawerWidth.xs,
             boxSizing: 'border-box',
-            background: 'linear-gradient(180deg, #ffffff 0%, #f8faff 100%)',
-            borderRight: '1px solid rgba(0,0,0,0.08)',
+            background: '#f9fafb',
+            borderRight: '1px solid #e5e7eb',
             transition: 'width 0.3s ease',
+            [theme.breakpoints.up('sm')]: {
+              width: isSidebarOpen ? drawerWidth.sm : drawerWidth.sm,
+            },
+            [theme.breakpoints.up('md')]: {
+              width: isSidebarOpen ? drawerWidth.md : drawerWidth.md,
+            },
           },
         }}
       >
-        <Toolbar />
-
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }} />
         {/* Brand Section */}
-        <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, textAlign: 'center' }}>
           <Paper
-            elevation={2}
+            elevation={0}
             sx={{
-              p: 2,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
+              p: { xs: 1.5, sm: 1.75, md: 2 },
+              background: '#fff',
+              color: '#222',
               borderRadius: 3,
+              boxShadow: 'none',
+              border: '1px solid #e5e7eb',
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 0.5,
+                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
+                color: '#222',
+              }}
+            >
               {isSidebarOpen ? 'VuiHoi AI' : '🎓'}
             </Typography>
             {isSidebarOpen && (
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  opacity: 0.8,
+                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
+                  color: '#555',
+                }}
+              >
                 Intelligent Learning Platform
               </Typography>
             )}
           </Paper>
         </Box>
-
         <Divider />
-
         {/* Navigation */}
-        <List sx={{ px: 2, py: 1 }}>
+        <List sx={{ px: { xs: 1.5, sm: 2 }, py: 1 }}>
           {navigationItems.map((item) => {
             const isActive = currentPath.startsWith(item.path);
             return (
-              <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
+              <ListItem key={item.path} disablePadding sx={{ mb: { xs: 0.5, sm: 1 } }}>
                 <ListItemButton
                   component={Link}
                   to={item.path}
                   sx={{
                     borderRadius: 2,
-                    minHeight: 56,
-                    backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                    color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                    minHeight: { xs: 48, sm: 52, md: 56 },
+                    backgroundColor: isActive ? '#e0e7ef' : 'transparent',
+                    color: isActive ? '#2563eb' : '#222',
                     '&:hover': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                      backgroundColor: '#f3f4f6',
                     },
                     ...(isActive && {
-                      borderLeft: `4px solid ${theme.palette.primary.main}`,
-                      fontWeight: 'bold',
+                      borderLeft: '4px solid #2563eb',
+                      fontWeight: 600,
                     }),
                   }}
                 >
                   <ListItemIcon
                     sx={{
                       color: 'inherit',
-                      minWidth: isSidebarOpen ? 56 : 'auto',
+                      minWidth: isSidebarOpen ? { xs: 48, sm: 52, md: 56 } : 'auto',
                       justifyContent: 'center',
+                      fontSize: '1.3rem',
                     }}
                   >
                     {item.icon}
@@ -245,11 +274,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       primary={item.name}
                       secondary={item.description}
                       primaryTypographyProps={{
-                        fontWeight: isActive ? 'bold' : 'medium',
-                        fontSize: '0.95rem',
+                        fontWeight: isActive ? 600 : 500,
+                        fontSize: { xs: '0.9rem', sm: '1rem', md: '1.05rem' },
+                        color: isActive ? '#2563eb' : '#222',
                       }}
                       secondaryTypographyProps={{
-                        fontSize: '0.75rem',
+                        fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                        color: '#555',
                       }}
                     />
                   )}
@@ -258,15 +289,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             );
           })}
         </List>
-
         {/* Bottom User Info (when collapsed) */}
         {!isSidebarOpen && (
           <Box sx={{ mt: 'auto', p: 2, textAlign: 'center' }}>
             <Avatar
               sx={{
                 bgcolor: theme.palette.primary.main,
-                width: 40,
-                height: 40,
+                width: { xs: 36, sm: 40 },
+                height: { xs: 36, sm: 40 },
                 mx: 'auto',
               }}
             >
@@ -275,20 +305,38 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Box>
         )}
       </Drawer>
-
       {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: '#f3f4f6',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
+          ml: { xs: `${drawerWidth.xs}px`, sm: `${drawerWidth.sm}px`, md: `${drawerWidth.md}px` },
+          width: {
+            xs: `calc(100% - ${drawerWidth.xs}px)`,
+            sm: `calc(100% - ${drawerWidth.sm}px)`,
+            md: `calc(100% - ${drawerWidth.md}px)`,
+          },
+          transition: 'margin-left 0.3s ease, width 0.3s ease',
         }}
       >
-        <Toolbar />
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>{children}</Box>
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }} />
+        <Box sx={{ flexGrow: 1, overflow: 'auto', p: { xs: 2, sm: 3, md: 4 } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 3, md: 4 },
+              borderRadius: 3,
+              background: '#fff',
+              boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+            }}
+          >
+            {children}
+          </Paper>
+        </Box>
       </Box>
     </Box>
   );
