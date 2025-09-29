@@ -1,5 +1,5 @@
 import AuthGuard from '../../guard/AuthGuard';
-import DashboardLayout from '../../components/DashboardLayout';
+import MainLayout from '../../components/MainLayout';
 
 const HistoryPage = () => {
   const conversations = [
@@ -58,7 +58,7 @@ const HistoryPage = () => {
 
   return (
     <AuthGuard>
-      <DashboardLayout>
+      <MainLayout>
         <div className="p-6">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
@@ -89,24 +89,15 @@ const HistoryPage = () => {
             {/* Conversations List */}
             <div className="space-y-4">
               {conversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className="bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
-                >
+                <div key={conversation.id} className="bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
                   <div className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(conversation.category)}`}
-                          >
-                            {conversation.category}
-                          </span>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(conversation.category)}`}>{conversation.category}</span>
                           <span className="text-gray-500 text-sm">{conversation.messageCount} tin nhắn</span>
                         </div>
-                        <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
-                          {conversation.title}
-                        </h3>
+                        <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">{conversation.title}</h3>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span>📅 {conversation.date}</span>
                           <span>⏰ {conversation.time}</span>
@@ -125,13 +116,11 @@ const HistoryPage = () => {
 
             {/* Load More Button */}
             <div className="text-center mt-8">
-              <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                Xem thêm cuộc trò chuyện
-              </button>
+              <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Xem thêm cuộc trò chuyện</button>
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </MainLayout>
     </AuthGuard>
   );
 };

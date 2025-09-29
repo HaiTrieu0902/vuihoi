@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AuthGuard from '../../guard/AuthGuard';
-import DashboardLayout from '../../components/DashboardLayout';
+import MainLayout from '../../components/MainLayout';
 
 const TranslatePage = () => {
   const [sourceText, setSourceText] = useState('');
@@ -44,7 +44,7 @@ const TranslatePage = () => {
 
   return (
     <AuthGuard>
-      <DashboardLayout>
+      <MainLayout>
         <div className="p-6">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
@@ -72,17 +72,9 @@ const TranslatePage = () => {
                 </div>
 
                 {/* Swap Button */}
-                <button
-                  onClick={handleSwapLanguages}
-                  className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
-                >
+                <button onClick={handleSwapLanguages} className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                   </svg>
                 </button>
 
@@ -122,14 +114,7 @@ const TranslatePage = () => {
                       {isTranslating ? (
                         <span className="flex items-center space-x-2">
                           <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path
                               className="opacity-75"
                               fill="currentColor"
@@ -181,7 +166,7 @@ const TranslatePage = () => {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </MainLayout>
     </AuthGuard>
   );
 };

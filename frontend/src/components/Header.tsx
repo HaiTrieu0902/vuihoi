@@ -1,52 +1,147 @@
-import { Link } from '@tanstack/react-router';
+import { AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Toolbar, Typography, useTheme } from '@mui/material';
+import { useRouter } from '@tanstack/react-router';
+import { useState } from 'react';
 import { useAuthStore } from '../store/auth';
-import { MSALService } from '../services/oauth';
 
-export default function Header() {
-  const { isAuthenticated, user } = useAuthStore();
+type HeaderProps = {
+  onToggleSidebar: () => void;
+};
 
-  const handleLogout = async () => {
-    try {
-      await MSALService.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-      window.location.href = '/auth/login';
-    }
+const Header = ({ onToggleSidebar }: HeaderProps) => {
+  const { user, actions } = useAuthStore();
+  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const theme = useTheme();
+
+  const handleLogout = () => {
+    actions.logout();
+    router.navigate({ to: '/auth/login' });
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   return (
-    <header
-      className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm"
-      style={{ minHeight: 64 }}
+    <AppBar
+      position="fixed"
+      elevation={0}
+      sx={{
+        zIndex: theme.zIndex.drawer + 1,
+        bgcolor: '#ffffff',
+        borderBottom: '1px solid #f0f0f0',
+        color: '#000000d9',
+      }}
     >
-      <nav className="flex items-center gap-4">
-        <button className="text-2xl text-gray-500 hover:text-gray-700 focus:outline-none mr-2" aria-label="Menu">
-          <span className="material-icons">menu</span>
-        </button>
-        <h1 className="text-xl font-semibold text-gray-800 tracking-wide">VuiHoi AI Platform</h1>
-        <div className="px-2 font-medium text-gray-600">
-          <Link to="/">Home</Link>
-        </div>
-      </nav>
+      <Toolbar sx={{ minHeight: 64, px: 3 }}>
+        <IconButton
+          aria-label="toggle drawer"
+          onClick={onToggleSidebar}
+          edge="start"
+          sx={{
+            mr: 2,
+            color: '#00000073',
+            '&:hover': {
+              bgcolor: '#f5f5f5',
+            },
+          }}
+        >
+          <Box sx={{ fontSize: '18px' }}>☰</Box>
+        </IconButton>
 
-      <div className="flex items-center gap-4">
-        {isAuthenticated && user ? (
-          <div className="flex items-center gap-2">
-            <span className="text-base text-gray-700">Hello, {user.name || user.email}</span>
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg font-bold text-gray-600 border border-gray-300">
-              {user.name ? user.name[0] : 'U'}
-            </div>
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors border border-gray-300"
+        <Typography
+          variant="h6"
+          noWrap
+          component="div"
+          sx={{
+            flexGrow: 1,
+            fontSize: '16px',
+            fontWeight: 500,
+            color: '#000000d9',
+          }}
+        >
+          Dashboard
+        </Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body2" sx={{ color: '#00000073', display: { xs: 'none', sm: 'block' } }}>
+            {user?.name || user?.email?.split('@')[0] || 'User'}
+          </Typography>
+
+          <IconButton
+            size="small"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenuOpen}
+            sx={{
+              p: 0,
+            }}
+          >
+            <Avatar
+              sx={{
+                bgcolor: '#1890ff',
+                color: 'white',
+                width: 32,
+                height: 32,
+                fontSize: '14px',
+                fontWeight: 500,
+              }}
             >
-              Logout
-            </button>
-          </div>
-        ) : (
-          <span className="text-base text-gray-500">Welcome, Guest</span>
-        )}
-      </div>
-    </header>
+              {user?.name ? user.name.charAt(0) : user?.email ? user.email.charAt(0) : 'U'}
+            </Avatar>
+          </IconButton>
+        </Box>
+
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          keepMounted
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              minWidth: 160,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              borderRadius: '6px',
+            },
+          }}
+        >
+          <MenuItem disabled sx={{ py: 1.5, px: 2 }}>
+            <Box>
+              <Typography variant="body2" sx={{ fontSize: '12px', color: '#00000073' }}>
+                Signed in as
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: '#000000d9', fontSize: '14px' }}>
+                {user?.email}
+              </Typography>
+            </Box>
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              py: 1.5,
+              px: 2,
+              fontSize: '14px',
+              '&:hover': {
+                bgcolor: '#f5f5f5',
+              },
+            }}
+          >
+            Logout
+          </MenuItem>
+        </Menu>
+      </Toolbar>
+    </AppBar>
   );
-}
+};
+
+export default Header;
