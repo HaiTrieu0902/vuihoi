@@ -8,6 +8,12 @@ from loguru import logger
 from sqlalchemy import text
 
 from api.routers.auth import router as auth_router, oauth_router
+from api.routers.chat import router as chat_router
+from api.routers.contact import router as contact_router
+from api.routers.featured import router as featured_router
+from api.routers.health import router as health_router
+from api.routers.research import router as research_router
+from api.routers.translate import router as translate_router
 
 from core.middleware import (
     APIRateLimitMiddleware,
@@ -100,16 +106,16 @@ app.add_middleware(
 )
 
 # Public routes
-# app.include_router(health_router)
+app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(oauth_router)
+app.include_router(contact_router)
+app.include_router(featured_router)
 
-# Protected routes
-# app.include_router(chat_router)
-# app.include_router(featured_router)
-# app.include_router(research_router)
-# app.include_router(translate_router)
-# app.include_router(contact_router)
+# Protected routes (require authentication)
+app.include_router(chat_router)
+app.include_router(research_router)
+app.include_router(translate_router)
 
 
 # Convenience for `uvicorn api.main:app --reload`

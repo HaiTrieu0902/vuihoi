@@ -1,0 +1,21 @@
+from pydantic_ai import Agent, RunContext
+
+from core.agents.translate.deps import TranslateDeps
+from core.agents.translate.prompts import system_prompt as translate_system_prompt
+from settings import settings
+
+translate_agent = Agent(
+    settings.model,
+    deps_type=TranslateDeps,
+    output_type=str,
+    retries=2,
+)
+
+
+@translate_agent.instructions
+async def translate_instructions(ctx: RunContext[TranslateDeps]) -> str:
+    return translate_system_prompt.format(
+        target_lang=ctx.deps.target_lang,
+        source_lang=ctx.deps.source_lang,
+        content_to_translate=ctx.deps.content_to_translate,
+    )

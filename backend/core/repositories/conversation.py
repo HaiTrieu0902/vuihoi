@@ -33,7 +33,7 @@ class ConversationRepository(BaseRepository[Conversation]):
             feature_preset_id=feature_preset.id,
             title=title,
             feature_params=feature_params or {},
-            user_id=user_id,
+            user_id=UUID(user_id) if user_id else None,
         )
         await self.add(conversation)
         await self.flush()
@@ -58,12 +58,16 @@ class ConversationRepository(BaseRepository[Conversation]):
 
     async def list_by_user_id(self, user_id: str) -> list[Conversation]:
         """
-        List conversations scoped to a specific user_id stored in
-        feature_params.
+        List conversations scoped to a specific user_id.
+        Check both the user_id field and feature_params for backward compatibility.
         """
         stmt = (
             select(Conversation)
-            .where(Conversation.feature_params["user_id"].astext == user_id)
+            .where(
+                # Try both the direct user_id field and the feature_params fallback
+                (Conversation.user_id == UUID(user_id)) | 
+                (Conversation.feature_params["user_id"].astext == user_id)
+            )
             .order_by(Conversation.created_at.desc())
         )
         result = await self.session.execute(stmt)
