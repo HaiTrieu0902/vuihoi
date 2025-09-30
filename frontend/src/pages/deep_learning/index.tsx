@@ -1,10 +1,93 @@
-import { Box, Button, Card, CardActions, CardContent, Chip, Fade, Paper, Typography, alpha, useTheme } from '@mui/material';
+import { Close as CloseIcon, Search as SearchIcon } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+  IconButton,
+  Paper,
+  Typography,
+  alpha,
+  useTheme,
+} from '@mui/material';
 import { Link } from '@tanstack/react-router';
-import AuthGuard from '../../guard/AuthGuard';
+import { useState } from 'react';
 import MainLayout from '../../components/MainLayout';
+import AuthGuard from '../../guard/AuthGuard';
+import { ResearchService, ResearchStreamEvent } from '../../services/api/research';
 
 const DeepLearningPage = () => {
   const theme = useTheme();
+  const [researchDialog, setResearchDialog] = useState({
+    open: false,
+    topic: null as any,
+    loading: false,
+    result: '',
+    progress: [] as ResearchStreamEvent[],
+  });
+
+  const handleStartResearch = async (topic: any) => {
+    setResearchDialog({
+      open: true,
+      topic,
+      loading: true,
+      result: '',
+      progress: [],
+    });
+
+    try {
+      const query = `Research and provide comprehensive information about "${topic.title}": ${topic.subtitle}. Focus on current trends, practical applications, and learning resources.`;
+
+      await ResearchService.runResearch(query, {
+        onProgress: (event) => {
+          setResearchDialog((prev) => ({
+            ...prev,
+            progress: [...prev.progress, event],
+          }));
+        },
+        onFinalReport: (report) => {
+          setResearchDialog((prev) => ({
+            ...prev,
+            result: report,
+            loading: false,
+          }));
+        },
+        onError: (error) => {
+          console.error('Research error:', error);
+          setResearchDialog((prev) => ({
+            ...prev,
+            loading: false,
+            result: 'An error occurred during research. Please try again.',
+          }));
+        },
+      });
+    } catch (error) {
+      console.error('Failed to start research:', error);
+      setResearchDialog((prev) => ({
+        ...prev,
+        loading: false,
+        result: 'Failed to start research. Please try again.',
+      }));
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setResearchDialog({
+      open: false,
+      topic: null,
+      loading: false,
+      result: '',
+      progress: [],
+    });
+  };
 
   const topics = [
     {
@@ -281,26 +364,48 @@ const DeepLearningPage = () => {
                     </CardContent>
 
                     <CardActions sx={{ p: 4, pt: 0, position: 'relative', zIndex: 1 }}>
-                      <Button
-                        component={Link}
-                        to="/chat"
-                        variant="contained"
-                        fullWidth
-                        sx={{
-                          borderRadius: 3,
-                          py: 1.5,
-                          fontWeight: 600,
-                          textTransform: 'none',
-                          background: `linear-gradient(135deg, ${topic.gradient[0]} 0%, ${topic.gradient[1]} 100%)`,
-                          '&:hover': {
-                            boxShadow: `0 8px 25px ${alpha(topic.gradient[0], 0.3)}`,
-                            transform: 'translateY(-1px)',
-                          },
-                          transition: 'all 0.3s ease',
-                        }}
-                      >
-                        Start Learning
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+                        <Button
+                          component={Link}
+                          to="/chat"
+                          size="small"
+                          variant="contained"
+                          sx={{
+                            flex: 1,
+                            borderRadius: 2,
+                            py: 0.5,
+                            fontWeight: 500,
+                            textTransform: 'none',
+                            background: `linear-gradient(135deg, ${topic.gradient[0]} 0%, ${topic.gradient[1]} 100%)`,
+                            '&:hover': {
+                              boxShadow: `0 8px 25px ${alpha(topic.gradient[0], 0.3)}`,
+                              transform: 'translateY(-1px)',
+                            },
+                            transition: 'all 0.3s ease',
+                          }}
+                        >
+                          Start Learning
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleStartResearch(topic)}
+                          sx={{
+                            borderRadius: 2,
+                            py: 0.5,
+                            px: -1.5,
+                            borderColor: topic.gradient[0],
+                            color: topic.gradient[0],
+                            '&:hover': {
+                              borderColor: topic.gradient[1],
+                              backgroundColor: alpha(topic.gradient[0], 0.1),
+                            },
+                            transition: 'all 0.3s ease',
+                          }}
+                        >
+                          <SearchIcon />
+                        </Button>
+                      </Box>
                     </CardActions>
                   </Card>
                 </Fade>
@@ -365,14 +470,14 @@ const DeepLearningPage = () => {
                 component={Link}
                 to="/chat"
                 variant="contained"
-                size="large"
+                size="small"
                 sx={{
-                  px: 6,
-                  py: 2,
+                  px: 4,
+                  py: 1,
                   borderRadius: 3,
                   textTransform: 'none',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
+                  fontWeight: 500,
+                  fontSize: '0.8rem',
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
                   '&:hover': {
@@ -386,6 +491,110 @@ const DeepLearningPage = () => {
               </Button>
             </Paper>
           </Fade>
+
+          {/* Research Dialog */}
+          <Dialog
+            open={researchDialog.open}
+            onClose={handleCloseDialog}
+            maxWidth="md"
+            fullWidth
+            sx={{
+              '& .MuiDialog-paper': {
+                borderRadius: 3,
+                maxHeight: '80vh',
+              },
+            }}
+          >
+            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <SearchIcon color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Research: {researchDialog.topic?.title}
+                </Typography>
+              </Box>
+              <IconButton onClick={handleCloseDialog} size="small">
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+
+            <DialogContent dividers sx={{ minHeight: 400 }}>
+              {researchDialog.loading ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 4 }}>
+                  <CircularProgress size={60} />
+                  <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
+                    Researching {researchDialog.topic?.title}...
+                  </Typography>
+
+                  {/* Progress indicators */}
+                  <Box sx={{ width: '100%', maxWidth: 400 }}>
+                    {researchDialog.progress.map((event, index) => (
+                      <Box key={index} sx={{ mb: 1, p: 2, borderRadius: 2, backgroundColor: 'grey.50' }}>
+                        <Typography variant="caption" color="primary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          {event.event.replace(/_/g, ' ')}
+                        </Typography>
+                        {event.event === 'web_search_query' && (
+                          <Typography variant="body2" sx={{ mt: 0.5 }}>
+                            Searching: {event.data.query}
+                          </Typography>
+                        )}
+                        {event.event === 'lead_answer' && (
+                          <Typography variant="body2" sx={{ mt: 0.5 }}>
+                            {event.data.answer.substring(0, 100)}...
+                          </Typography>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              ) : (
+                <Box>
+                  {researchDialog.result && (
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        lineHeight: 1.7,
+                        whiteSpace: 'pre-wrap',
+                        '& a': {
+                          color: theme.palette.primary.main,
+                          textDecoration: 'none',
+                          fontWeight: 500,
+                          '&:hover': {
+                            textDecoration: 'underline',
+                          },
+                        },
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: researchDialog.result.replace(/\n/g, '<br />').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'),
+                      }}
+                    />
+                  )}
+                  {!researchDialog.result && !researchDialog.loading && (
+                    <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+                      No research results available.
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </DialogContent>
+
+            <DialogActions sx={{ p: 3 }}>
+              <Button onClick={handleCloseDialog} variant="outlined">
+                Close
+              </Button>
+              {researchDialog.result && (
+                <Button
+                  component={Link}
+                  to="/chat"
+                  variant="contained"
+                  sx={{
+                    background: `linear-gradient(135deg, ${researchDialog.topic?.gradient[0]} 0%, ${researchDialog.topic?.gradient[1]} 100%)`,
+                  }}
+                >
+                  Continue in Chat
+                </Button>
+              )}
+            </DialogActions>
+          </Dialog>
         </Box>
       </MainLayout>
     </AuthGuard>

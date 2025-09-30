@@ -2,7 +2,7 @@ import { AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Toolbar, Typo
 import { useRouter } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useAuthStore } from '../store/auth';
-
+import LogoutIcon from '@mui/icons-material/Logout';
 type HeaderProps = {
   onToggleSidebar: () => void;
 };
@@ -60,11 +60,11 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
           sx={{
             flexGrow: 1,
             fontSize: '16px',
-            fontWeight: 500,
-            color: '#000000d9',
+            fontWeight: 600,
+            color: '#059669',
           }}
         >
-          Dashboard
+          VUIHOI AI
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -84,7 +84,7 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
           >
             <Avatar
               sx={{
-                bgcolor: '#1890ff',
+                bgcolor: '#059669',
                 color: 'white',
                 width: 32,
                 height: 32,
@@ -134,9 +134,16 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
               '&:hover': {
                 bgcolor: '#f5f5f5',
               },
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
             }}
           >
-            Logout
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {/* Import Logout icon from Material UI */}
+              <LogoutIcon sx={{ color: '#059669', fontSize: 20, mr: 1 }} />
+              Logout
+            </Box>
           </MenuItem>
         </Menu>
       </Toolbar>

@@ -94,23 +94,11 @@ const DashboardPage = () => {
 
               <Box sx={{ p: { xs: 4, sm: 5, md: 6 }, position: 'relative', zIndex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Box
-                    sx={{
-                      fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
-                      mr: 2,
-                      background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                      backgroundClip: 'text',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    🚀
-                  </Box>
                   <Typography
                     variant="h3"
                     sx={{
                       fontWeight: 800,
-                      background: 'linear-gradient(45deg, #2d3748 30%, #4a5568 90%)',
+                      background: 'linear-gradient(45deg,  #EA4D5B 30%, #059669 90%)',
                       backgroundClip: 'text',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
@@ -118,8 +106,27 @@ const DashboardPage = () => {
                       letterSpacing: '-0.02em',
                     }}
                   >
-                    Welcome to VuiHoi AI
+                    Welcome to
                   </Typography>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      width: { xs: 80, sm: 100, md: 140 },
+                      height: { xs: 60, sm: 75, md: 90 },
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <img
+                      src="/logo.png"
+                      alt="VuiHoi AI Logo"
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                      }}
+                    />
+                  </Box>
                 </Box>
 
                 <Typography

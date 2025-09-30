@@ -158,8 +158,3 @@ ALTER TABLE conversation
 ADD COLUMN user_id uuid REFERENCES users(id) ON DELETE CASCADE;
 
 
-
-
-
-select * from users u 
-select * from user_identity 
