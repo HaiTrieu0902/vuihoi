@@ -52,6 +52,14 @@ const DeepLearningPage = () => {
             ...prev,
             progress: [...prev.progress, event],
           }));
+
+          // Show intermediate answers as they come in
+          if (event.event === 'lead_answer') {
+            setResearchDialog((prev) => ({
+              ...prev,
+              result: prev.result + (event.data.answer || ''),
+            }));
+          }
         },
         onFinalReport: (report) => {
           setResearchDialog((prev) => ({
@@ -65,7 +73,7 @@ const DeepLearningPage = () => {
           setResearchDialog((prev) => ({
             ...prev,
             loading: false,
-            result: 'An error occurred during research. Please try again.',
+            result: typeof error === 'object' && 'message' in error ? error.message : 'An error occurred during research. Please try again.',
           }));
         },
       });
@@ -458,8 +466,8 @@ const DeepLearningPage = () => {
                 color="text.secondary"
                 sx={{
                   mb: 4,
-                  fontSize: { xs: '1rem', sm: '1.1rem' },
-                  maxWidth: 600,
+                  fontSize: { xs: '0.8rem', sm: '0.8rem' },
+                  maxWidth: 500,
                   mx: 'auto',
                   lineHeight: 1.6,
                 }}
@@ -517,77 +525,149 @@ const DeepLearningPage = () => {
               </IconButton>
             </DialogTitle>
 
-            <DialogContent dividers sx={{ minHeight: 400 }}>
+            <DialogContent dividers sx={{ minHeight: 400, maxHeight: 600, overflow: 'auto' }}>
               {researchDialog.loading ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 4 }}>
-                  <CircularProgress size={60} />
-                  <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    Researching {researchDialog.topic?.title}...
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                    <CircularProgress size={40} />
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
+                      Researching {researchDialog.topic?.title}
+                    </Typography>
+                  </Box>
 
-                  {/* Progress indicators */}
-                  <Box sx={{ width: '100%', maxWidth: 400 }}>
+                  {/* Live progress updates */}
+                  <Box sx={{ width: '100%' }}>
                     {researchDialog.progress.map((event, index) => (
-                      <Box key={index} sx={{ mb: 1, p: 2, borderRadius: 2, backgroundColor: 'grey.50' }}>
-                        <Typography variant="caption" color="primary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                      <Box key={index} sx={{ mb: 2, p: 3, borderRadius: 3, backgroundColor: 'grey.50', borderLeft: '4px solid', borderLeftColor: 'primary.main' }}>
+                        <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 700, textTransform: 'uppercase', mb: 1, fontSize: '0.75rem' }}>
                           {event.event.replace(/_/g, ' ')}
                         </Typography>
+                        {event.event === 'lead_thinking' && (
+                          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                            💭 {event.data.thinking}
+                          </Typography>
+                        )}
                         {event.event === 'web_search_query' && (
-                          <Typography variant="body2" sx={{ mt: 0.5 }}>
-                            Searching: {event.data.query}
+                          <Typography variant="body2" sx={{ color: 'success.main' }}>
+                            🔍 Searching: "{event.data.query}"
+                          </Typography>
+                        )}
+                        {event.event === 'web_search_results' && (
+                          <Typography variant="body2" sx={{ color: 'info.main' }}>
+                            📄 Found {event.data.results?.length || 0} results
                           </Typography>
                         )}
                         {event.event === 'lead_answer' && (
-                          <Typography variant="body2" sx={{ mt: 0.5 }}>
-                            {event.data.answer.substring(0, 100)}...
+                          <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                            ✨ {event.data.answer}
                           </Typography>
                         )}
                       </Box>
                     ))}
                   </Box>
+
+                  {/* Show partial results if available */}
+                  {researchDialog.result && (
+                    <Box sx={{ mt: 3, p: 3, borderRadius: 3, backgroundColor: 'primary.light', color: 'primary.contrastText' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                        Partial Results:
+                      </Typography>
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {researchDialog.result.substring(0, 200)}...
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               ) : (
                 <Box>
-                  {researchDialog.result && (
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        lineHeight: 1.7,
-                        whiteSpace: 'pre-wrap',
-                        '& a': {
-                          color: theme.palette.primary.main,
-                          textDecoration: 'none',
-                          fontWeight: 500,
-                          '&:hover': {
-                            textDecoration: 'underline',
+                  {researchDialog.result ? (
+                    <Box>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          lineHeight: 1.8,
+                          whiteSpace: 'pre-wrap',
+                          '& h1': { fontSize: '0.9rem', fontWeight: 500, mb: 2, mt: 3 },
+                          '& h2': { fontSize: '0.9rem', fontWeight: 500, mb: 1.5, mt: 2 },
+                          '& h3': { fontSize: '0.9rem', fontWeight: 500, mb: 1, mt: 1.5 },
+                          '& p': { mb: 1.5 },
+                          '& ul': { pl: 3, mb: 1.5 },
+                          '& ol': { pl: 3, mb: 1.5 },
+                          '& li': { mb: 0.5 },
+                          '& a': {
+                            color: theme.palette.primary.main,
+                            textDecoration: 'none',
+                            fontWeight: 500,
+                            '&:hover': {
+                              textDecoration: 'underline',
+                            },
                           },
-                        },
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: researchDialog.result.replace(/\n/g, '<br />').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'),
-                      }}
-                    />
-                  )}
-                  {!researchDialog.result && !researchDialog.loading && (
-                    <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                      No research results available.
-                    </Typography>
+                          '& code': {
+                            backgroundColor: 'grey.100',
+                            padding: '2px 6px',
+                            borderRadius: 1,
+                            fontSize: '0.9em',
+                            fontFamily: 'monospace',
+                          },
+                          '& blockquote': {
+                            borderLeft: '3px solid',
+                            borderLeftColor: 'primary.main',
+                            pl: 2,
+                            py: 1,
+                            backgroundColor: 'grey.50',
+                            fontStyle: 'italic',
+                          },
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: researchDialog.result
+                            .replace(/\n/g, '<br />')
+                            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            .replace(/`(.*?)`/g, '<code>$1</code>'),
+                        }}
+                      />
+                    </Box>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 8 }}>
+                      <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
+                        No research results available.
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Try clicking the research button again or use the chat interface.
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
               )}
             </DialogContent>
 
-            <DialogActions sx={{ p: 3 }}>
-              <Button onClick={handleCloseDialog} variant="outlined">
+            <DialogActions sx={{ p: 3, gap: 1 }}>
+              <Button onClick={handleCloseDialog} variant="outlined" size="large">
                 Close
               </Button>
-              {researchDialog.result && (
+
+              {!researchDialog.loading && (
+                <Button onClick={() => handleStartResearch(researchDialog.topic)} variant="outlined" color="primary" size="large" startIcon={<SearchIcon />}>
+                  Research Again
+                </Button>
+              )}
+
+              {researchDialog.result && !researchDialog.loading && (
                 <Button
                   component={Link}
-                  to="/chat"
+                  to={`/chat?topic=${encodeURIComponent(researchDialog.topic?.title || '')}&research=${encodeURIComponent(researchDialog.result.substring(0, 200))}`}
                   variant="contained"
+                  size="large"
                   sx={{
                     background: `linear-gradient(135deg, ${researchDialog.topic?.gradient[0]} 0%, ${researchDialog.topic?.gradient[1]} 100%)`,
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${researchDialog.topic?.gradient[0]} 0%, ${researchDialog.topic?.gradient[1]} 100%)`,
+                      opacity: 0.9,
+                    },
                   }}
                 >
                   Continue in Chat

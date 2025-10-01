@@ -4,6 +4,7 @@ import json
 
 from api.routers.models.requests import (
     TranslateFileRequest,
+    TranslateTextRequest,
     TranslateURLRequest,
 )
 from core.agents.translate.agent import translate_agent
@@ -18,6 +19,101 @@ from loguru import logger
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 
 router = APIRouter(prefix="/api/translate", tags=["translate"])
+
+
+@router.post(
+    "/text",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "description": "Successful streaming response",
+            "content": {
+                "text/event-stream": {
+                    "schema": {
+                        "type": "string",
+                        "example": (
+                            'event: ai_message\ndata: {"chunk": {"content": "Xin chào"}}\n\n'
+                        ),
+                    }
+                }
+            },
+        },
+        422: {"description": "Validation Error"},
+    },
+)
+async def translate_text(
+    payload: TranslateTextRequest, current_user: CurrentUser
+) -> StreamingResponse:
+    async def stream_generator():
+        try:
+            async with AsyncSessionLocal() as session:
+                svc = TranslateService(session)
+
+                # Resolve existing conversation or create a new one
+                conversation = None
+                created_new_conversation = False
+                if payload.conversation_id is not None:
+                    conversation = await svc.get_conversation_by_id(payload.conversation_id)
+                    if conversation is not None:
+                        owner_id = None
+                        if isinstance(conversation.feature_params, dict):
+                            owner_id = conversation.feature_params.get("user_id")
+                        if owner_id and owner_id != current_user.user_id:
+                            from fastapi import HTTPException
+
+                            raise HTTPException(status_code=403, detail="Forbidden")
+                if conversation is None:
+                    conversation = await svc.create_conversation_with_preset(owner=current_user)
+                    created_new_conversation = True
+
+                if created_new_conversation:
+                    evt_payload = {"conversation_id": str(conversation.id)}
+                    yield format_sse("conversation_created", evt_payload)
+
+                # Load past messages (optional for context)
+                message_history = await svc.load_message_history(conversation.id)
+
+                # Build user prompt content
+                user_prompt = payload.message or "Please translate the following text:"
+
+                async def on_complete(result) -> list[str]:
+                    events: list[str] = []
+                    try:
+                        msgs = ModelMessagesTypeAdapter.validate_python(result.new_messages())
+                        jsonable_msgs = svc.to_jsonable_messages(msgs)
+                        await svc.persist_message_run(conversation, jsonable_msgs)
+                        try:
+                            await session.commit()
+                        except Exception:
+                            logger.exception("Failed to commit session after run persistence")
+                    except Exception:
+                        logger.exception("Failed to persist translation message run")
+                    return events
+
+                async for sse_message in stream_agent_text(
+                    translate_agent,
+                    user_prompt,
+                    deps=TranslateDeps(
+                        target_lang=payload.target_lang,
+                        source_lang=payload.source_lang,
+                        content_to_translate=payload.text,
+                    ),
+                    message_history=message_history,
+                    on_complete=on_complete,
+                ):
+                    yield sse_message
+        except Exception as exc:
+            error_response = {
+                "error": "Translate Text execution error",
+                "error_type": type(exc).__name__,
+                "details": str(exc),
+            }
+            yield format_sse("error", error_response)
+
+    return StreamingResponse(
+        stream_generator(),
+        media_type="text/event-stream; charset=utf-8",
+    )
 
 
 @router.post(

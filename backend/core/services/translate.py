@@ -78,7 +78,27 @@ class TranslateService(BaseConversationService):
                 return None
             return results[0].get("content")
         except Exception:
-            logger.exception("Failed to fetch URL content")
+            logger.exception("Failed to fetch URL content with crawler, trying simple HTTP request")
+            return await self._simple_fetch_url(url)
+
+    async def _simple_fetch_url(self, url: str) -> str | None:
+        """Simple fallback for URL fetching when Playwright fails"""
+        try:
+            import aiohttp
+            from markdownify import markdownify as md
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=30) as response:
+                    if response.status == 200:
+                        content = await response.text()
+                        # Convert HTML to markdown
+                        markdown_content = md(content, heading_style="ATX")
+                        return markdown_content
+                    else:
+                        logger.error(f"HTTP {response.status} when fetching {url}")
+                        return None
+        except Exception as e:
+            logger.exception(f"Simple URL fetch also failed for {url}: {e}")
             return None
 
     def extract_text_from_media(self, media: Optional[list[BinaryContentIn]]) -> str:

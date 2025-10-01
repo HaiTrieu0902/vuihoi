@@ -45,6 +45,10 @@ export interface ConversationCreatedEvent {
   conversation_id: string;
 }
 
+export interface ErrorEvent {
+  message: string;
+}
+
 export class ResearchService {
   /**
    * Start a research session and return a readable stream of events
@@ -118,7 +122,7 @@ export class ResearchService {
       onSubagentCompleted?: (data: SubagentCompletedEvent) => void;
       onFinalReport?: (data: FinalReportEvent) => void;
       onConversationCreated?: (data: ConversationCreatedEvent) => void;
-      onError?: (error: Error) => void;
+      onError?: (error: Error | ErrorEvent) => void;
     },
   ): Promise<void> {
     const reader = stream.getReader();
@@ -169,6 +173,9 @@ export class ResearchService {
                 case 'conversation_created':
                   handlers.onConversationCreated?.(event.data);
                   break;
+                case 'error':
+                  handlers.onError?.(event.data as ErrorEvent);
+                  break;
                 default:
                   console.log('Unknown event type:', event.event, event.data);
               }
@@ -194,7 +201,7 @@ export class ResearchService {
       media?: any[];
       onProgress?: (event: ResearchStreamEvent) => void;
       onFinalReport?: (report: string) => void;
-      onError?: (error: Error) => void;
+      onError?: (error: Error | ErrorEvent) => void;
     } = {},
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {

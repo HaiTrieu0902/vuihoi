@@ -8,6 +8,9 @@ class BaseTranslateRequest(ConversationMixin):
     target_lang: str = "Vietnamese"
     source_lang: str = "English"
     message: str = ""
+
+class TranslateTextRequest(BaseTranslateRequest):
+    text: str
     
 class TranslateURLRequest(BaseTranslateRequest):
     url: str
